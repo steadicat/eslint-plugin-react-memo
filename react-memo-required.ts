@@ -1,7 +1,7 @@
 import { Rule } from "eslint";
 import * as ESTree from "estree";
 
-const componentNameRegex = /^[A-Z]/;
+const componentNameRegex = /^[^a-z]/;
 
 function isMemoCallExpression(node: Rule.Node) {
   if (node.type !== "CallExpression") return false;
@@ -59,23 +59,23 @@ function checkFunction(
   }
 }
 
-export const rules: { [Key: string]: Rule.RuleModule } = {
-  "react-memo-required": {
-    meta: {
-      messages: {
-        "memo-required": "Component definition not wrapped in React.memo()",
-      },
+const rule: Rule.RuleModule = {
+  meta: {
+    messages: {
+      "memo-required": "Component definition not wrapped in React.memo()",
     },
-    create: (context) => ({
-      ArrowFunctionExpression(node) {
-        checkFunction(context, node);
-      },
-      FunctionDeclaration(node) {
-        checkFunction(context, node);
-      },
-      FunctionExpression(node) {
-        checkFunction(context, node);
-      },
-    }),
   },
+  create: (context) => ({
+    ArrowFunctionExpression(node) {
+      checkFunction(context, node);
+    },
+    FunctionDeclaration(node) {
+      checkFunction(context, node);
+    },
+    FunctionExpression(node) {
+      checkFunction(context, node);
+    },
+  }),
 };
+
+export default rule;

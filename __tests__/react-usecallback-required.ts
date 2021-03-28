@@ -1,5 +1,5 @@
 import { RuleTester } from "eslint";
-import { rules } from "../react-usecallback-required";
+import rule from "../react-usecallback-required";
 
 const ruleTester = new RuleTester({
   parser: require.resolve("@typescript-eslint/parser"),
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run("useCallback", rules["react-usecallback-required"], {
+ruleTester.run("useCallback", rule, {
   valid: [
     {
       code: `const Component = () => {

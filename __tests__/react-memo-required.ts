@@ -1,5 +1,5 @@
 import { RuleTester } from "eslint";
-import { rules } from "../react-memo-required";
+import rule from "../react-memo-required";
 
 const ruleTester = new RuleTester({
   parser: require.resolve("@typescript-eslint/parser"),
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run("memo", rules["react-memo-required"], {
+ruleTester.run("memo", rule, {
   valid: [
     {
       code: `const Component = React.memo(() => <div />)`,

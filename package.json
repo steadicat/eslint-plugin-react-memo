@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/eslint": "^7.2.7",
     "@types/jest": "^26.0.22",

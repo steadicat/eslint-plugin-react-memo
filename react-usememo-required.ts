@@ -33,71 +33,71 @@ function isUseMemoCallExpression(node: Rule.Node) {
   return false;
 }
 
-export const rules: { [Key: string]: Rule.RuleModule } = {
-  "react-usememo-required": {
-    meta: {
-      messages: {
-        "usememo-required":
-          "Object definition needs to be wrapped in React.useMemo() if used as a prop",
-        "usememo-const-required":
-          "React.useMemo() needs to be assigned to a const to prevent reassignment",
-      },
+const rule: Rule.RuleModule = {
+  meta: {
+    messages: {
+      "usememo-required":
+        "Object definition needs to be wrapped in React.useMemo() if used as a prop",
+      "usememo-const-required":
+        "React.useMemo() needs to be assigned to a const to prevent reassignment",
     },
-    create: (context) => ({
-      JSXAttribute(node) {
-        const { parent, value } = node as TSESTree.JSXAttribute &
-          Rule.NodeParentExtension;
-        if (!isComplexComponent(parent)) return;
-        if (value.type === "JSXExpressionContainer") {
-          const { expression } = value;
+  },
+  create: (context) => ({
+    JSXAttribute(node) {
+      const { parent, value } = node as TSESTree.JSXAttribute &
+        Rule.NodeParentExtension;
+      if (!isComplexComponent(parent)) return;
+      if (value.type === "JSXExpressionContainer") {
+        const { expression } = value;
 
-          if (
-            expression.type === "ObjectExpression" ||
-            expression.type === "ArrayExpression" ||
-            expression.type === "NewExpression"
-          ) {
-            context.report({ node: node, messageId: "usememo-required" });
-            return;
-          }
+        if (
+          expression.type === "ObjectExpression" ||
+          expression.type === "ArrayExpression" ||
+          expression.type === "NewExpression"
+        ) {
+          context.report({ node: node, messageId: "usememo-required" });
+          return;
+        }
 
-          if (expression.type === "Identifier") {
-            const { name } = expression;
-            const variable = context
-              .getScope()
-              .variables.find((v) => v.name === name);
-            const [{ node }] = variable.defs;
-            if (node.type === "VariableDeclarator") {
-              const { init, parent } = node;
+        if (expression.type === "Identifier") {
+          const { name } = expression;
+          const variable = context
+            .getScope()
+            .variables.find((v) => v.name === name);
+          const [{ node }] = variable.defs;
+          if (node.type === "VariableDeclarator") {
+            const { init, parent } = node;
 
-              if (parent.kind === "let") {
-                context.report({
-                  node: node,
-                  messageId: "usememo-const-required",
-                });
+            if (parent.kind === "let") {
+              context.report({
+                node: node,
+                messageId: "usememo-const-required",
+              });
+            }
+
+            let currentNode = init;
+            while (currentNode.type === "CallExpression") {
+              if (isUseMemoCallExpression(currentNode)) {
+                return;
               }
+              currentNode = currentNode.arguments[0];
+            }
 
-              let currentNode = init;
-              while (currentNode.type === "CallExpression") {
-                if (isUseMemoCallExpression(currentNode)) {
-                  return;
-                }
-                currentNode = currentNode.arguments[0];
-              }
-
-              if (
-                currentNode.type === "ObjectExpression" ||
-                currentNode.type === "ArrayExpression" ||
-                currentNode.type === "NewExpression"
-              ) {
-                context.report({
-                  node: currentNode,
-                  messageId: "usememo-required",
-                });
-              }
+            if (
+              currentNode.type === "ObjectExpression" ||
+              currentNode.type === "ArrayExpression" ||
+              currentNode.type === "NewExpression"
+            ) {
+              context.report({
+                node: currentNode,
+                messageId: "usememo-required",
+              });
             }
           }
         }
-      },
-    }),
-  },
+      }
+    },
+  }),
 };
+
+export default rule;
