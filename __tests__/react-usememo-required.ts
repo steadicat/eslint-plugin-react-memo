@@ -135,6 +135,13 @@ ruleTester.run("useCallback", rule, {
       }`,
     },
     {
+      code: `
+      const myFn = () => {};
+      const Component = () => {
+        return <div prop={myFn} />;
+      }`,
+    },
+    {
       code: `const Component = () => {
       const myFn1 = useCallback(() => [], []);
       const myFn2 = React.useCallback(() => myFn1, [myFn1]);
