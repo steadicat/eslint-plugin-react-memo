@@ -44,7 +44,12 @@ ruleTester.run("memo", rule, {
       code: `function myFunction() { return <div />; }`,
     },
     {
-      code: `const myFunction = wrapper(function () { return <div /> })`,
+      code: `const myFunction = wrapper(function() { return <div /> })`,
+    },
+    {
+      filename: "dir/myFunction.js",
+      parserOptions: { ecmaVersion: 6, sourceType: "module" },
+      code: `export default function() { return <div /> };`,
     },
   ],
   invalid: [
@@ -68,5 +73,11 @@ ruleTester.run("memo", rule, {
       code: `function Component() { return <div />; }`,
       errors: [{ messageId: "memo-required" }],
     },
+    // {
+    //   filename: "dir/Component.js",
+    //   parserOptions: { ecmaVersion: 6, sourceType: "module" },
+    //   code: `export default function() { return <div /> };`,
+    //   errors: [{ messageId: "memo-required" }],
+    // },
   ],
 });

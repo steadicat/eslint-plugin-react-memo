@@ -1,5 +1,6 @@
 import { Rule } from "eslint";
 import * as ESTree from "estree";
+import * as path from "path";
 
 const componentNameRegex = /^[^a-z]/;
 
@@ -53,8 +54,14 @@ function checkFunction(
     node.type === "FunctionDeclaration" &&
     currentNode.type === "Program"
   ) {
-    if (componentNameRegex.test(node.id.name)) {
+    if (node.id !== null && componentNameRegex.test(node.id.name)) {
       context.report({ node: currentNode, messageId: "memo-required" });
+    } else {
+      if (context.getFilename() === "<input>") return;
+      const filename = path.basename(context.getFilename());
+      if (componentNameRegex.test(filename)) {
+        context.report({ node: currentNode, messageId: "memo-required" });
+      }
     }
   }
 }

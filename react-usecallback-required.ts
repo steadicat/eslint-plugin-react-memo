@@ -1,7 +1,8 @@
 import { Rule } from "eslint";
+import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 
-const componentNameRegex = /^[A-Z]/;
+const componentNameRegex = /^[^a-z]/;
 
 function isComplexComponent(node: TSESTree.JSXOpeningElement) {
   if (node.type !== "JSXOpeningElement") return false;
@@ -43,9 +44,10 @@ const rule: Rule.RuleModule = {
     },
   },
   create: (context) => ({
-    JSXAttribute(node) {
-      const { parent, value } = node as TSESTree.JSXAttribute &
+    JSXAttribute: (node: ESTree.Node & Rule.NodeParentExtension) => {
+      const { parent, value } = (node as unknown) as TSESTree.JSXAttribute &
         Rule.NodeParentExtension;
+      if (value === null) return;
       if (!isComplexComponent(parent)) return;
       if (value.type === "JSXExpressionContainer") {
         const { expression } = value;
@@ -63,6 +65,7 @@ const rule: Rule.RuleModule = {
           const variable = context
             .getScope()
             .variables.find((v) => v.name === name);
+          if (variable === undefined) return;
           const [{ node }] = variable.defs;
           if (node.type === "VariableDeclarator") {
             const { init, parent } = node;
