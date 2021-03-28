@@ -2,17 +2,29 @@
   "name": "eslint-plugin-react-memo",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
-  "author": "",
+  "main": "dist/index.js",
+  "author": "Stefano J. Attardi <github@attardi.org>",
   "license": "MIT",
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-typescript": "^8.2.1",
     "@types/eslint": "^7.2.7",
     "@types/jest": "^26.0.22",
     "@typescript-eslint/parser": "^4.19.0",
     "@typescript-eslint/types": "^4.19.0",
     "eslint": "^7.23.0",
     "jest": "^26.6.3",
+    "rollup": "^2.43.1",
     "ts-jest": "^26.5.4",
     "typescript": "^4.2.3"
-  }
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "rm -rf dist && rollup -c",
+    "prepublish:public": "npm run build && npm run bump-version",
+    "publish:public": "npm publish --access public"
+  },
+  "files": [
+    "dist"
+  ]
 }

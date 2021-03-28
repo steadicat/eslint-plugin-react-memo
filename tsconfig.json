@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "outDir": "dist"
+  },
+  "exclude": ["__tests__"]
 }
