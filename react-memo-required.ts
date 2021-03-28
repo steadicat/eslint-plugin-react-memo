@@ -4,28 +4,24 @@ import * as ESTree from "estree";
 const componentNameRegex = /^[A-Z]/;
 
 function isMemoCallExpression(node: Rule.Node) {
-  if (node.type === "CallExpression") {
-    if (node.callee.type === "MemberExpression") {
-      const {
-        callee: { object, property },
-      } = node;
-      if (
-        object.type === "Identifier" &&
-        property.type === "Identifier" &&
-        object.name === "React" &&
-        property.name === "memo"
-      ) {
-        return true;
-      }
-    } else if (
-      node.callee.type === "Identifier" &&
-      node.callee.name === "memo"
+  if (node.type !== "CallExpression") return false;
+  if (node.callee.type === "MemberExpression") {
+    const {
+      callee: { object, property },
+    } = node;
+    if (
+      object.type === "Identifier" &&
+      property.type === "Identifier" &&
+      object.name === "React" &&
+      property.name === "memo"
     ) {
       return true;
     }
-
-    return false;
+  } else if (node.callee.type === "Identifier" && node.callee.name === "memo") {
+    return true;
   }
+
+  return false;
 }
 
 function checkFunction(
