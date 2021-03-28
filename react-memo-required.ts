@@ -47,7 +47,7 @@ function checkFunction(
     const { id } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
-        context.report({ node: currentNode, messageId: "memo-required" });
+        context.report({ node, messageId: "memo-required" });
       }
     }
   } else if (
@@ -55,12 +55,12 @@ function checkFunction(
     currentNode.type === "Program"
   ) {
     if (node.id !== null && componentNameRegex.test(node.id.name)) {
-      context.report({ node: currentNode, messageId: "memo-required" });
+      context.report({ node, messageId: "memo-required" });
     } else {
       if (context.getFilename() === "<input>") return;
       const filename = path.basename(context.getFilename());
       if (componentNameRegex.test(filename)) {
-        context.report({ node: currentNode, messageId: "memo-required" });
+        context.report({ node, messageId: "memo-required" });
       }
     }
   }
