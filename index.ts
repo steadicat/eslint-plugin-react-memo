@@ -1,7 +1,7 @@
-import reactMemoRule from "./react-memo-required";
-import reactUseMemoRule from "./react-usememo-required";
+import requireMemoRule from "./require-memo";
+import requireUseMemoRule from "./require-usememo";
 
 export const rules = {
-  "react-memo-required": reactMemoRule,
-  "react-usememo-required": reactUseMemoRule,
+  "require-memo": requireMemoRule,
+  "require-usememo": requireUseMemoRule,
 };

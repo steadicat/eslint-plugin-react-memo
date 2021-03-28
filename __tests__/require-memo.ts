@@ -1,5 +1,5 @@
 import { RuleTester } from "eslint";
-import rule from "../react-memo-required";
+import rule from "../require-memo";
 
 const ruleTester = new RuleTester({
   parser: require.resolve("@typescript-eslint/parser"),
