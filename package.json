@@ -4,6 +4,10 @@
   "description": "",
   "main": "dist/index.js",
   "author": "Stefano J. Attardi <github@attardi.org>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steadicat/eslint-plugin-react-memo.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^11.2.1",
