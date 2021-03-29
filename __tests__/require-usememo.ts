@@ -75,6 +75,10 @@ ruleTester.run("useMemo", rule, {
         return <Child prop={myObject} />;
       }`,
       errors: [{ messageId: "object-usememo-props" }],
+      output: `const Component = () => {
+        const myObject = React.useMemo(() => ({}), []);
+        return <Child prop={myObject} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -82,6 +86,10 @@ ruleTester.run("useMemo", rule, {
         return <Child prop={myArray} />;
       }`,
       errors: [{ messageId: "array-usememo-props" }],
+      output: `const Component = () => {
+        const myArray = React.useMemo(() => [], []);
+        return <Child prop={myArray} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -89,6 +97,10 @@ ruleTester.run("useMemo", rule, {
         return <Child prop={myInstance} />;
       }`,
       errors: [{ messageId: "instance-usememo-props" }],
+      output: `const Component = () => {
+        const myInstance = React.useMemo(() => new Object(), []);
+        return <Child prop={myInstance} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -97,18 +109,31 @@ ruleTester.run("useMemo", rule, {
         return <Child prop={myObject} />;
       }`,
       errors: [{ messageId: "usememo-const" }],
+      output: `const Component = () => {
+        const myObject = useMemo({});
+        myObject = {a: 'b'};
+        return <Child prop={myObject} />;
+      }`,
     },
     {
       code: `const Component = () => {
         return <Child prop={{}} />;
       }`,
       errors: [{ messageId: "object-usememo-props" }],
+      output: `const Component = () => {
+        const prop = React.useMemo(() => ({}), []);
+        return <Child prop={prop} />;
+      }`,
     },
     {
       code: `const Component = () => {
         return <Child prop={[]} />;
       }`,
       errors: [{ messageId: "array-usememo-props" }],
+      output: `const Component = () => {
+        const prop = React.useMemo(() => [], []);
+        return <Child prop={prop} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -117,6 +142,10 @@ ruleTester.run("useMemo", rule, {
       }`,
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
+      output: `const Component = () => {
+        const myObject = React.useMemo(() => memoize({}), []);
+        return <Child prop={myObject} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -125,6 +154,10 @@ ruleTester.run("useMemo", rule, {
       }`,
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
+      output: `const Component = () => {
+        const myArray = React.useMemo(() => lodash.memoize([]), []);
+        return <Child prop={myArray} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -133,6 +166,11 @@ ruleTester.run("useMemo", rule, {
         return <Child prop={myArray2} />;
       }`,
       errors: [{ messageId: "array-usememo-deps" }],
+      output: `const Component = () => {
+        const myArray1 = React.useMemo(() => [], []);
+        const myArray2 = React.useMemo(() => myArray1, [myArray1]);
+        return <Child prop={myArray2} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -141,6 +179,10 @@ ruleTester.run("useMemo", rule, {
       }`,
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
+      output: `const Component = () => {
+        const myComplexString = React.useMemo(() => css\`color: red;\`, []);
+        return <Child prop={myComplexString} />;
+      }`,
     },
   ],
 });

@@ -56,22 +56,27 @@ ruleTester.run("memo", rule, {
     {
       code: `const Component = () => <div />`,
       errors: [{ messageId: "memo-required" }],
+      output: `const Component = React.memo(() => <div />)`,
     },
     {
-      code: `const Component = useRef(() => <div />)`,
+      code: `const Component = React.forwardRef((props, ref) => <div />)`,
       errors: [{ messageId: "memo-required" }],
+      output: `const Component = React.memo(React.forwardRef((props, ref) => <div />))`,
     },
     {
       code: `const Component = function Component() { return <div />; }`,
       errors: [{ messageId: "memo-required" }],
+      output: `const Component = React.memo(function Component() { return <div />; })`,
     },
     {
-      code: `const Component = useRef(function() { return <div />; })`,
+      code: `const Component = forwardRef(function() { return <div />; })`,
       errors: [{ messageId: "memo-required" }],
+      output: `const Component = React.memo(forwardRef(function() { return <div />; }))`,
     },
     {
       code: `function Component() { return <div />; }`,
       errors: [{ messageId: "memo-required" }],
+      output: `const Component = React.memo(function Component() { return <div />; })`,
     },
     // {
     //   filename: "dir/Component.js",

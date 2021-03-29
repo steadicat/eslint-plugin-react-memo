@@ -12,15 +12,15 @@ ruleTester.run("useCallback", rule, {
   valid: [
     {
       code: `const Component = () => {
-      const myFn = React.useCallback(function() {}, []);
-      return <Child prop={myFn} />;
-    }`,
+        const myFn = React.useCallback(function() {}, []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
-      const myFn = useCallback(() => {}, []);
-      return <Child prop={myFn} />;
-    }`,
+        const myFn = useCallback(() => {}, []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -43,9 +43,9 @@ ruleTester.run("useCallback", rule, {
     },
     {
       code: `const Component = () => {
-      const myFn1 = useCallback(() => [], []);
-      const myFn2 = React.useCallback(() => myFn1, [myFn1]);
-      return <Child prop={myFn2} />;
+        const myFn1 = useCallback(() => [], []);
+        const myFn2 = React.useCallback(() => myFn1, [myFn1]);
+        return <Child prop={myFn2} />;
       }`,
     },
     {
@@ -64,10 +64,14 @@ ruleTester.run("useCallback", rule, {
   invalid: [
     {
       code: `const Component = () => {
-        const myFn = function myFn() {};
+        function myFn() {};
         return <Child prop={myFn} />;
       }`,
       errors: [{ messageId: "function-usecallback-props" }],
+      output: `const Component = () => {
+        const myFn = React.useCallback(function myFn() {}, []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -75,6 +79,10 @@ ruleTester.run("useCallback", rule, {
         return <Child prop={myFn} />;
       }`,
       errors: [{ messageId: "function-usecallback-props" }],
+      output: `const Component = () => {
+        const myFn = React.useCallback(() => {}, []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -83,18 +91,32 @@ ruleTester.run("useCallback", rule, {
         return <Child prop={myFn} />;
       }`,
       errors: [{ messageId: "usememo-const" }],
+      output: `const Component = () => {
+        const myFn = useCallback(() => ({}));
+        myFn = () => ({});
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
-        return <Child prop={() => {}} />;
+        const prop = () => {};
+        return <Child prop={prop} />;
       }`,
       errors: [{ messageId: "function-usecallback-props" }],
+      output: `const Component = () => {
+        const prop = React.useCallback(() => {}, []);
+        return <Child prop={prop} />;
+      }`,
     },
     {
-      code: `const Component = () => {
+      code: `const Component = () => (
+        <Child prop={() => []} />
+      )`,
+      errors: [{ messageId: "function-usecallback-props" }],
+      output: `const Component = () => {
+        const prop = React.useCallback(() => [], []);
         return <Child prop={() => []} />;
       }`,
-      errors: [{ messageId: "function-usecallback-props" }],
     },
     {
       code: `const Component = () => {
@@ -103,6 +125,10 @@ ruleTester.run("useCallback", rule, {
       }`,
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
+      output: `const Component = () => {
+        const myFn = React.useMemo(() => memoize(() => {}), []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -111,6 +137,10 @@ ruleTester.run("useCallback", rule, {
       }`,
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
+      output: `const Component = () => {
+        const myFn = React.useMemo(() => lodash.memoize(() => []), []);
+        return <Child prop={myFn} />;
+      }`,
     },
     {
       code: `const Component = () => {
@@ -119,6 +149,11 @@ ruleTester.run("useCallback", rule, {
         return <Child prop={myFn2} />;
       }`,
       errors: [{ messageId: "function-usecallback-deps" }],
+      output: `const Component = () => {
+        const myFn1 = React.useCallback(() => [], []);
+        const myFn2 = React.useCallback(() => myFn1, [myFn1]);
+        return <Child prop={myFn2} />;
+      }`,
     },
   ],
 });
