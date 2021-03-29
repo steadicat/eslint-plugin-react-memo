@@ -26,29 +26,29 @@ function isHook(node: TSESTree.Node) {
 
 const messages = {
   "object-usememo-props":
-    "Object literal should be wrapped in React.useMemo() if used as a prop",
+    "Object literal should be wrapped in React.useMemo() when used as a prop",
   "object-usememo-deps":
-    "Object literal should be wrapped in React.useMemo() if used as a hook dependency",
+    "Object literal should be wrapped in React.useMemo() when used as a hook dependency",
   "array-usememo-props":
-    "Array literal should be wrapped in React.useMemo() if used as a prop",
+    "Array literal should be wrapped in React.useMemo() when used as a prop",
   "array-usememo-deps":
-    "Array literal should be wrapped in React.useMemo() if used as a hook dependency",
+    "Array literal should be wrapped in React.useMemo() when used as a hook dependency",
   "instance-usememo-props":
-    "Object instantiation should be wrapped in React.useMemo() if used as a prop",
+    "Object instantiation should be wrapped in React.useMemo() when used as a prop",
   "instance-usememo-deps":
-    "Object instantiation should be wrapped in React.useMemo() if used as a hook dependency",
+    "Object instantiation should be wrapped in React.useMemo() when used as a hook dependency",
   "jsx-usememo-props":
-    "JSX should be wrapped in React.useMemo() if used as a prop",
+    "JSX should be wrapped in React.useMemo() when used as a prop",
   "jsx-usememo-deps":
-    "JSX should be wrapped in React.useMemo() if used as a hook dependency",
+    "JSX should be wrapped in React.useMemo() when used as a hook dependency",
   "function-usecallback-props":
-    "Function definition should be wrapped in React.useCallback() if used as a prop",
+    "Function definition should be wrapped in React.useCallback() when used as a prop",
   "function-usecallback-deps":
-    "Function definition should be wrapped in React.useCallback() if used as a hook dependency",
+    "Function definition should be wrapped in React.useCallback() when used as a hook dependency",
   "unknown-usememo-props":
-    "Unknown value may need to be wrapped in React.useMemo() if used as a prop",
+    "Unknown value may need to be wrapped in React.useMemo() when used as a prop",
   "unknown-usememo-deps":
-    "Unknown value may need to be wrapped in React.useMemo() if used as a hook dependency",
+    "Unknown value may need to be wrapped in React.useMemo() when used as a hook dependency",
   "usememo-const":
     "useMemo/useCallback return value should be assigned to a const to prevent reassignment",
 };
