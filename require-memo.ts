@@ -25,6 +25,16 @@ function isMemoCallExpression(node: Rule.Node) {
   return false;
 }
 
+function wrapInMemo(node: { range?: [number, number] } | null | undefined) {
+  if (node === null || node === undefined) return () => [];
+  const { range } = node;
+  if (range === undefined) return () => [];
+  return (fixer: Rule.RuleFixer): Rule.Fix[] => [
+    fixer.insertTextBeforeRange(range, "React.memo("),
+    fixer.insertTextAfterRange(range, ")"),
+  ];
+}
+
 function checkFunction(
   context: Rule.RuleContext,
   node: (
@@ -34,8 +44,12 @@ function checkFunction(
   ) &
     Rule.NodeParentExtension
 ) {
-  function report(node: Rule.Node, messageId: keyof typeof messages) {
-    context.report({ node, messageId: messageId as string });
+  function report(
+    node: Rule.Node,
+    messageId: keyof typeof messages,
+    fix: (fixer: Rule.RuleFixer) => Rule.Fix[]
+  ) {
+    context.report({ node, messageId: messageId as string, fix });
   }
 
   let currentNode = node.parent;
@@ -48,23 +62,34 @@ function checkFunction(
   }
 
   if (currentNode.type === "VariableDeclarator") {
-    const { id } = currentNode;
+    const { id, init } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
-        report(node, "memo-required");
+        report(node, "memo-required", wrapInMemo(init));
       }
     }
   } else if (
     node.type === "FunctionDeclaration" &&
     currentNode.type === "Program"
   ) {
-    if (node.id !== null && componentNameRegex.test(node.id.name)) {
-      report(node, "memo-required");
+    const { id, range } = node;
+    if (id !== null && componentNameRegex.test(id.name)) {
+      report(node, "memo-required", (fixer) =>
+        range !== undefined
+          ? [
+              fixer.insertTextBeforeRange(
+                range,
+                `const ${id.name} = React.memo(`
+              ),
+              fixer.insertTextAfterRange(range, ")"),
+            ]
+          : []
+      );
     } else {
       if (context.getFilename() === "<input>") return;
       const filename = path.basename(context.getFilename());
       if (componentNameRegex.test(filename)) {
-        report(node, "memo-required");
+        report(node, "memo-required", wrapInMemo(node));
       }
     }
   }
@@ -75,7 +100,7 @@ const messages = {
 };
 
 const rule: Rule.RuleModule = {
-  meta: { messages },
+  meta: { messages, fixable: "code" },
   create: (context) => ({
     ArrowFunctionExpression(node) {
       checkFunction(context, node);
