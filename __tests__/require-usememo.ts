@@ -88,14 +88,14 @@ ruleTester.run("useMemo", rule, {
       const myObject = memoize({});
       return <Child prop={myObject} />;
     }`,
-      errors: [{ messageId: "object-usememo-props" }],
+      errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
       const myArray = lodash.memoize([]);
       return <Child prop={myArray} />;
     }`,
-      errors: [{ messageId: "array-usememo-props" }],
+      errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {

@@ -1,6 +1,14 @@
 import { Rule } from "eslint";
 import { TSESTree } from "@typescript-eslint/types";
 
+const componentNameRegex = /^[^a-z]/;
+
+export function isComplexComponent(node: TSESTree.JSXOpeningElement) {
+  if (node.type !== "JSXOpeningElement") return false;
+  if (node.name.type !== "JSXIdentifier") return false;
+  return componentNameRegex.test(node.name.name);
+}
+
 export enum MemoStatus {
   Memoized,
   UnmemoizedObject,
@@ -34,6 +42,20 @@ function isCallExpression(
   return false;
 }
 
+function getIdentifierMemoStatus(
+  context: Rule.RuleContext,
+  { name }: TSESTree.Identifier
+): MemoStatus {
+  const variable = context.getScope().variables.find((v) => v.name === name);
+  if (variable === undefined) return MemoStatus.Memoized;
+  const [{ node }] = variable.defs;
+  if (node.type !== "VariableDeclarator") return MemoStatus.Memoized;
+  if (node.parent.kind === "let") {
+    context.report({ node, messageId: "usememo-const" });
+  }
+  return getExpressionMemoStatus(context, node.init);
+}
+
 export function getExpressionMemoStatus(
   context: Rule.RuleContext,
   expression: TSESTree.Expression
@@ -61,21 +83,6 @@ export function getExpressionMemoStatus(
     case "Identifier":
       return getIdentifierMemoStatus(context, expression);
     default:
-      console.log(expression.type);
       return MemoStatus.Memoized;
   }
-}
-
-export function getIdentifierMemoStatus(
-  context: Rule.RuleContext,
-  { name }: TSESTree.Identifier
-): MemoStatus {
-  const variable = context.getScope().variables.find((v) => v.name === name);
-  if (variable === undefined) return MemoStatus.Memoized;
-  const [{ node }] = variable.defs;
-  if (node.type !== "VariableDeclarator") return MemoStatus.Memoized;
-  if (node.parent.kind === "let") {
-    context.report({ node, messageId: "usememo-const" });
-  }
-  return getExpressionMemoStatus(context, node.init);
 }

@@ -70,7 +70,7 @@ ruleTester.run("useCallback", rule, {
         myFn = () => ({});
         return <Child prop={myFn} />;
       }`,
-      errors: [{ messageId: "usecallback-const" }],
+      errors: [{ messageId: "usememo-const" }],
     },
     {
       code: `const Component = () => {
@@ -89,14 +89,14 @@ ruleTester.run("useCallback", rule, {
       const myFn = memoize(() => {});
       return <Child prop={myFn} />;
     }`,
-      errors: [{ messageId: "function-usecallback-props" }],
+      errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
       const myFn = lodash.memoize(() => []);
       return <Child prop={myFn} />;
     }`,
-      errors: [{ messageId: "function-usecallback-props" }],
+      errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
