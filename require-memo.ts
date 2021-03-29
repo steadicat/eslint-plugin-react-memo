@@ -34,6 +34,10 @@ function checkFunction(
   ) &
     Rule.NodeParentExtension
 ) {
+  function report(node: Rule.Node, messageId: keyof typeof messages) {
+    context.report({ node, messageId: messageId as string });
+  }
+
   let currentNode = node.parent;
   while (currentNode.type === "CallExpression") {
     if (isMemoCallExpression(currentNode)) {
@@ -47,7 +51,7 @@ function checkFunction(
     const { id } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
-        context.report({ node, messageId: "memo-required" });
+        report(node, "memo-required");
       }
     }
   } else if (
@@ -55,23 +59,23 @@ function checkFunction(
     currentNode.type === "Program"
   ) {
     if (node.id !== null && componentNameRegex.test(node.id.name)) {
-      context.report({ node, messageId: "memo-required" });
+      report(node, "memo-required");
     } else {
       if (context.getFilename() === "<input>") return;
       const filename = path.basename(context.getFilename());
       if (componentNameRegex.test(filename)) {
-        context.report({ node, messageId: "memo-required" });
+        report(node, "memo-required");
       }
     }
   }
 }
 
+const messages = {
+  "memo-required": "Component definition not wrapped in React.memo()",
+};
+
 const rule: Rule.RuleModule = {
-  meta: {
-    messages: {
-      "memo-required": "Component definition not wrapped in React.memo()",
-    },
-  },
+  meta: { messages },
   create: (context) => ({
     ArrowFunctionExpression(node) {
       checkFunction(context, node);
