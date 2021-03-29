@@ -17,6 +17,7 @@ export enum MemoStatus {
   UnmemoizedFunction,
   UnmemoizedFunctionCall,
   UnmemoizedJSX,
+  UnmemoizedOther,
 }
 
 function isCallExpression(
@@ -82,7 +83,9 @@ export function getExpressionMemoStatus(
       return MemoStatus.UnmemoizedFunctionCall;
     case "Identifier":
       return getIdentifierMemoStatus(context, expression);
-    default:
+    case "BinaryExpression":
       return MemoStatus.Memoized;
+    default:
+      return MemoStatus.UnmemoizedOther;
   }
 }

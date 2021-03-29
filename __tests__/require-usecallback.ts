@@ -48,6 +48,18 @@ ruleTester.run("useCallback", rule, {
       return <Child prop={myFn2} />;
       }`,
     },
+    {
+      code: `const Component = () => {
+        const myFn = memoize(() => {});
+        return <Child prop={myFn} />;
+      }`,
+    },
+    {
+      code: `const Component = () => {
+        const myFn = lodash.memoize(() => []);
+        return <Child prop={myFn} />;
+      }`,
+    },
   ],
   invalid: [
     {
@@ -86,23 +98,25 @@ ruleTester.run("useCallback", rule, {
     },
     {
       code: `const Component = () => {
-      const myFn = memoize(() => {});
-      return <Child prop={myFn} />;
-    }`,
+        const myFn = memoize(() => {});
+        return <Child prop={myFn} />;
+      }`,
+      options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
-      const myFn = lodash.memoize(() => []);
-      return <Child prop={myFn} />;
-    }`,
+        const myFn = lodash.memoize(() => []);
+        return <Child prop={myFn} />;
+      }`,
+      options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
-      const myFn1 = () => [];
-      const myFn2 = React.useCallback(() => myFn1, [myFn1]);
-      return <Child prop={myFn2} />;
+        const myFn1 = () => [];
+        const myFn2 = React.useCallback(() => myFn1, [myFn1]);
+        return <Child prop={myFn2} />;
       }`,
       errors: [{ messageId: "function-usecallback-deps" }],
     },

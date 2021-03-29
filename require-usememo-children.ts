@@ -28,7 +28,16 @@ const messages = {
 };
 
 const rule: Rule.RuleModule = {
-  meta: { messages },
+  meta: {
+    messages,
+    schema: [
+      {
+        type: "object",
+        properties: { strict: { type: "boolean" } },
+        additionalProperties: false,
+      },
+    ],
+  },
   create: (context) => {
     function report(node: Rule.Node, messageId: keyof typeof messages) {
       context.report({ node, messageId: messageId as string });
@@ -64,7 +73,10 @@ const rule: Rule.RuleModule = {
                   report(node, "function-usecallback-children");
                   break;
                 case MemoStatus.UnmemoizedFunctionCall:
-                  report(node, "unknown-usememo-children");
+                case MemoStatus.UnmemoizedOther:
+                  if (context.options?.[0]?.strict) {
+                    report(node, "unknown-usememo-children");
+                  }
                   break;
                 case MemoStatus.UnmemoizedJSX:
                   report(node, "jsx-usememo-children");

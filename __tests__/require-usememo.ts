@@ -40,6 +40,33 @@ ruleTester.run("useMemo", rule, {
         return <div prop={myArray} />;
       }`,
     },
+    {
+      code: `const Component = () => {
+        const myNumber1 = 123;
+        const myNumber2 = 123 + 456;
+        const myString1 = 'abc';
+        const myString2 = \`abc\`;
+        return <div n1={myNumber} n2={myNumber2} s1={myString1} s2={myString2} />;
+      }`,
+    },
+    {
+      code: `const Component = () => {
+        const myObject = memoize({});
+        return <Child prop={myObject} />;
+      }`,
+    },
+    {
+      code: `const Component = () => {
+        const myArray = lodash.memoize([]);
+        return <Child prop={myArray} />;
+      }`,
+    },
+    {
+      code: `const Component = () => {
+        const myComplexString = css\`color: red;\`;
+        return <Child prop={myComplexString} />;
+      }`,
+    },
   ],
   invalid: [
     {
@@ -85,25 +112,35 @@ ruleTester.run("useMemo", rule, {
     },
     {
       code: `const Component = () => {
-      const myObject = memoize({});
-      return <Child prop={myObject} />;
-    }`,
+        const myObject = memoize({});
+        return <Child prop={myObject} />;
+      }`,
+      options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
-      const myArray = lodash.memoize([]);
-      return <Child prop={myArray} />;
-    }`,
+        const myArray = lodash.memoize([]);
+        return <Child prop={myArray} />;
+      }`,
+      options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
     {
       code: `const Component = () => {
-      const myArray1 = [];
-      const myArray2 = React.useMemo(() => myArray1, [myArray1]);
-      return <Child prop={myArray2} />;
-    }`,
+        const myArray1 = [];
+        const myArray2 = React.useMemo(() => myArray1, [myArray1]);
+        return <Child prop={myArray2} />;
+      }`,
       errors: [{ messageId: "array-usememo-deps" }],
+    },
+    {
+      code: `const Component = () => {
+        const myComplexString = css\`color: red;\`;
+        return <Child prop={myComplexString} />;
+      }`,
+      options: [{ strict: true }],
+      errors: [{ messageId: "unknown-usememo-props" }],
     },
   ],
 });
