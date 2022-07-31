@@ -1,5 +1,6 @@
 import { Rule } from "eslint";
 import { TSESTree } from "@typescript-eslint/types";
+import * as ESTree from "estree";
 
 const componentNameRegex = /^[^a-z]/;
 
@@ -45,16 +46,28 @@ function isCallExpression(
 
 function getIdentifierMemoStatus(
   context: Rule.RuleContext,
-  { name }: TSESTree.Identifier
+  expression: TSESTree.Identifier
 ): MemoStatus {
-  const variable = context.getScope().variables.find((v) => v.name === name);
-  if (variable === undefined) return MemoStatus.Memoized;
-  const [{ node }] = variable.defs;
+  const node = findDefinition(context, expression);
+  if (!node) return MemoStatus.Memoized;
   if (node.type !== "VariableDeclarator") return MemoStatus.Memoized;
-  if (node.parent.kind === "let") {
-    context.report({ node, messageId: "usememo-const" });
+  const {
+    kind,
+    range: [start],
+  } = node.parent as TSESTree.VariableDeclaration;
+  if (kind === "let") {
+    context.report({
+      node: node as ESTree.Node,
+      messageId: "usememo-const",
+      fix: (fixer) => [
+        fixer.replaceTextRange(
+          [start, start + kind.length] as [number, number],
+          "const"
+        ),
+      ],
+    });
   }
-  return getExpressionMemoStatus(context, node.init);
+  return getExpressionMemoStatus(context, node.init!);
 }
 
 export function getExpressionMemoStatus(
@@ -88,4 +101,25 @@ export function getExpressionMemoStatus(
     default:
       return MemoStatus.UnmemoizedOther;
   }
+}
+
+function findDefinition(
+  context: Rule.RuleContext,
+  expression: TSESTree.Expression
+) {
+  if (expression.type !== "Identifier") return null;
+  const { name } = expression;
+  const variable = context.getScope().variables.find((v) => v.name === name);
+  if (variable === undefined) return null;
+  const [{ node }] = variable.defs;
+  return node as TSESTree.VariableDeclarator;
+}
+
+export function findInit(
+  context: Rule.RuleContext,
+  expression: TSESTree.Expression
+) {
+  const def = findDefinition(context, expression);
+  if (def !== null) return def.init;
+  return expression;
 }

@@ -2,6 +2,7 @@ import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 import {
+  findInit,
   getExpressionMemoStatus,
   isComplexComponent,
   MemoStatus,
@@ -22,6 +23,36 @@ function isHook(node: TSESTree.Node) {
   } else {
     return false;
   }
+}
+
+function wrapInUseMemo(
+  context: Rule.RuleContext,
+  expression: TSESTree.Expression | null | undefined
+) {
+  if (expression === null || expression === undefined) return () => [];
+  const init = findInit(context, expression);
+  if (!init) return () => [];
+  const { range } = init;
+  if (range === undefined) return () => [];
+  return (fixer: Rule.RuleFixer): Rule.Fix[] => [
+    fixer.insertTextBeforeRange(range, "React.useMemo(() => "),
+    fixer.insertTextAfterRange(range, ", [])"),
+  ];
+}
+
+function wrapInUseCallback(
+  context: Rule.RuleContext,
+  expression: TSESTree.Expression | null | undefined
+) {
+  if (expression === null || expression === undefined) return () => [];
+  const init = findInit(context, expression);
+  if (!init) return () => [];
+  const { range } = init;
+  if (range === undefined) return () => [];
+  return (fixer: Rule.RuleFixer): Rule.Fix[] => [
+    fixer.insertTextBeforeRange(range, "React.useCallback("),
+    fixer.insertTextAfterRange(range, ", [])"),
+  ];
 }
 
 const messages = {
@@ -56,6 +87,7 @@ const messages = {
 const rule: Rule.RuleModule = {
   meta: {
     messages,
+    fixable: "code",
     schema: [
       {
         type: "object",
@@ -65,8 +97,12 @@ const rule: Rule.RuleModule = {
     ],
   },
   create: (context) => {
-    function report(node: Rule.Node, messageId: keyof typeof messages) {
-      context.report({ node, messageId: messageId as string });
+    function report(
+      node: Rule.Node,
+      messageId: keyof typeof messages,
+      fix: (fixer: Rule.RuleFixer) => Rule.Fix[]
+    ) {
+      context.report({ node, messageId: messageId as string, fix });
     }
 
     return {
@@ -80,25 +116,49 @@ const rule: Rule.RuleModule = {
           if (expression.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                report(node, "object-usememo-props");
+                report(
+                  node,
+                  "object-usememo-props",
+                  wrapInUseMemo(context, expression)
+                );
                 break;
               case MemoStatus.UnmemoizedArray:
-                report(node, "array-usememo-props");
+                report(
+                  node,
+                  "array-usememo-props",
+                  wrapInUseMemo(context, expression)
+                );
                 break;
               case MemoStatus.UnmemoizedNew:
-                report(node, "instance-usememo-props");
+                report(
+                  node,
+                  "instance-usememo-props",
+                  wrapInUseMemo(context, expression)
+                );
                 break;
               case MemoStatus.UnmemoizedFunction:
-                report(node, "function-usecallback-props");
+                report(
+                  node,
+                  "function-usecallback-props",
+                  wrapInUseCallback(context, expression)
+                );
                 break;
               case MemoStatus.UnmemoizedFunctionCall:
               case MemoStatus.UnmemoizedOther:
                 if (context.options?.[0]?.strict) {
-                  report(node, "unknown-usememo-props");
+                  report(
+                    node,
+                    "unknown-usememo-props",
+                    wrapInUseMemo(context, expression)
+                  );
                 }
                 break;
               case MemoStatus.UnmemoizedJSX:
-                report(node, "jsx-usememo-props");
+                report(
+                  node,
+                  "jsx-usememo-props",
+                  wrapInUseMemo(context, expression)
+                );
                 break;
             }
           }
@@ -121,25 +181,45 @@ const rule: Rule.RuleModule = {
             if (dep !== null && dep.type === "Identifier") {
               switch (getExpressionMemoStatus(context, dep)) {
                 case MemoStatus.UnmemoizedObject:
-                  report(node, "object-usememo-deps");
+                  report(
+                    node,
+                    "object-usememo-deps",
+                    wrapInUseMemo(context, dep)
+                  );
                   break;
                 case MemoStatus.UnmemoizedArray:
-                  report(node, "array-usememo-deps");
+                  report(
+                    node,
+                    "array-usememo-deps",
+                    wrapInUseMemo(context, dep)
+                  );
                   break;
                 case MemoStatus.UnmemoizedNew:
-                  report(node, "instance-usememo-deps");
+                  report(
+                    node,
+                    "instance-usememo-deps",
+                    wrapInUseMemo(context, dep)
+                  );
                   break;
                 case MemoStatus.UnmemoizedFunction:
-                  report(node, "function-usecallback-deps");
+                  report(
+                    node,
+                    "function-usecallback-deps",
+                    wrapInUseCallback(context, dep)
+                  );
                   break;
                 case MemoStatus.UnmemoizedFunctionCall:
                 case MemoStatus.UnmemoizedOther:
                   if (context.options?.[0]?.strict) {
-                    report(node, "unknown-usememo-deps");
+                    report(
+                      node,
+                      "unknown-usememo-deps",
+                      wrapInUseMemo(context, dep)
+                    );
                   }
                   break;
                 case MemoStatus.UnmemoizedJSX:
-                  report(node, "jsx-usememo-deps");
+                  report(node, "jsx-usememo-deps", wrapInUseMemo(context, dep));
                   break;
               }
             }
