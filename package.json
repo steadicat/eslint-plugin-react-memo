@@ -24,7 +24,9 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "rm -rf dist && rollup -c",
+    "build": "npm run clean && rollup -c",
+    "watch": "npm run clean && rollup -c -w",
+    "clean": "rm -rf dist",
     "prepublish:public": "npm run build && npm run bump-version",
     "publish:public": "npm publish --access public"
   },
