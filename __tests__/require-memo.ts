@@ -51,26 +51,41 @@ ruleTester.run("memo", rule, {
       parserOptions: { ecmaVersion: 6, sourceType: "module" },
       code: `export default function() { return <div /> };`,
     },
-  ],
-  invalid: [
     {
       code: `const Component = () => <div />`,
-      errors: [{ messageId: "memo-required" }],
     },
     {
       code: `const Component = useRef(() => <div />)`,
-      errors: [{ messageId: "memo-required" }],
     },
     {
       code: `const Component = function Component() { return <div />; }`,
-      errors: [{ messageId: "memo-required" }],
     },
     {
       code: `const Component = useRef(function() { return <div />; })`,
-      errors: [{ messageId: "memo-required" }],
     },
     {
       code: `function Component() { return <div />; }`,
+    },
+  ],
+  invalid: [
+    {
+      code: `const Component = ({foo}) => <div />`,
+      errors: [{ messageId: "memo-required" }],
+    },
+    {
+      code: `const Component = useRef(({foo}) => <div />)`,
+      errors: [{ messageId: "memo-required" }],
+    },
+    {
+      code: `const Component = function Component({foo}) { return <div />; }`,
+      errors: [{ messageId: "memo-required" }],
+    },
+    {
+      code: `const Component = useRef(function({foo}) { return <div />; })`,
+      errors: [{ messageId: "memo-required" }],
+    },
+    {
+      code: `function Component({foo}) { return <div />; }`,
       errors: [{ messageId: "memo-required" }],
     },
     // {

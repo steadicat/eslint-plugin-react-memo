@@ -34,6 +34,8 @@ function checkFunction(
   ) &
     Rule.NodeParentExtension
 ) {
+  if (node.params.length === 0) return;
+
   let currentNode = node.parent;
   while (currentNode.type === "CallExpression") {
     if (isMemoCallExpression(currentNode)) {
